@@ -1,0 +1,118 @@
+
+#include <Cpu/Std/IfxCpu.h>
+#include <IfxPort_PinMap.h>
+
+#include <SysSe/Bsp/Bsp.h>
+#include <Port/Std/IfxPort.h>
+
+
+#include "../Act/Configuration.h"
+#include "../Act/ConfigurationIsr.h"
+#include "../Act/IRsensorController2.h"
+#include "../Act/MoterController.h"
+#include "../Act/UltraSonicController.h"
+
+int sensor_data;
+uint32 sensor[4] = {0,0,0,0};
+int state;
+
+
+void initirensor (void){
+    //create configuration
+    }
+void get_sensordata(uint8* data){
+
+}
+void        initultrasonic      (void){}
+void        get_ultrasonicdata  (uint8* data){}
+void        initmoterdrive      (void){}
+
+void        Running_Front       (void){
+    //오른쪽 모터 100%
+    //왼쪽 모터 100%
+}
+void        Running_Front_Left  (void){
+    //오른쪽 모터 50%미만
+    //왼쪽 모터 100%
+}
+void        Running_Left        (void){
+    //오른쪽 모터 100%
+    //왼쪽 모터 0%
+    //왼쪽 모터 역회전
+}
+void        Running_Front_Right (void){
+    //오른쪽 모터 50%미만
+    //왼쪽 모터 100%
+}
+void        Running_Right       (void){
+    //오른쪽 모터 100
+    //왼쪽 모터 0
+    //왼쪽모터 역회전
+}
+void        Running_back        (void){}
+void        Running_stop        (void){}
+
+void change(){
+    int first, second, third, Fourth;
+    sensor_data = (sensor[0]<<3)|(sensor[1]<<2)|(sensor[2]<<1)|(sensor[3]);
+}
+
+void Direction_Control (void){
+    initirensor();
+    initultrasonic();
+    initmoterdrive();
+
+    //duty
+    //pwd
+
+    while(1){
+        /*
+         * block line = 1
+         * white line = 0
+         * sensor   DEC_value   state   Handle Direction
+         * 0000     0           0       No_line
+         * 0001     1           5       Hard_right
+         * 0011     3           4       Weak_right
+         * 0111     7           4       Weak_right
+         * 1111     15          1       Middle
+         * 1110     14          2       Weak_left
+         * 1100     12          2       Weak_left
+         * 1000     8           3       Hard_left
+         * */
+
+        if(sensor_data == 1&& (state == 2 || state == 3)){
+            Running_Front_Left();
+        }
+        else if(sensor_data == 1 && (state == 4 || state == 5)){
+            Running_Front_Right();
+        }
+
+
+        switch(sensor_data){
+            case 0 : Running_stop();state = 0;break;//검은색 안나타남
+            case 1 :{ //완젼 세게 우회전
+                //오른쪽으로 치우칠때까지 반복 (센서 4,3가 0이 될 때 까지)
+                while(sensor[2] || sensor[3]){
+                    Running_Right();
+                }
+                state = 5;
+                break;
+            }
+            case 3 :
+            case 7 : Running_Front_Right();state = 4; break;//우회전
+            case 15: Running_Front(); state = 1;break;//정 중앙  1111
+            case 14:
+            case 12:Running_Front_Left();state = 2;break;//좌회전
+            case 8 : {
+                //왼쪽으로 살짝 치우칠때까지 반복 (센서 1,2가 0이 될 때 까지)
+                while(sensor[0] || sensor[1]){
+                    Running_Left();
+                }
+                state = 3;
+                break;
+            }
+        }
+    }
+}
+
+
