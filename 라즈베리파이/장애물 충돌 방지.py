@@ -175,7 +175,6 @@ class ultrasonic:
         
         return distance
 
-
 # delay 2s
 time.sleep(2)
 
