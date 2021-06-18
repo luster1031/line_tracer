@@ -217,9 +217,7 @@ def line_tracer():
                                 elif data == 4 :
                                         print("--------left")
                                         mo.MT_hard_left()
-                                        
-                                #print("--------11111stop")
-                                #mo.MT_stop()
+                              
                         
         except KeyboardInterrupt:
                 pass
